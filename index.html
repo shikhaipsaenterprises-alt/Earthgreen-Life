@@ -660,16 +660,16 @@
             <div><span class="num" style="color:#fff;">Free</span><span class="lbl" style="color:#8FA089;">INITIAL SITE REVIEW</span></div>
           </div>
         </div>
-        <form class="cta-form" onsubmit="return false;">
+        <form class="cta-form" id="assessmentForm" action="mailto:shikha.singh@earthgreen.life" method="post" enctype="text/plain" aria-describedby="enquiryHelp">
           <h3>Request a site assessment</h3>
           <p class="sub">No obligation — we'll follow up with a short call to scope things properly.</p>
           <div class="field-row">
-            <div class="field"><label for="fname">First name</label><input id="fname" type="text" placeholder="Jordan"></div>
-            <div class="field"><label for="lname">Last name</label><input id="lname" type="text" placeholder="Rivera"></div>
+            <div class="field"><label for="fname">First name</label><input id="fname" name="firstName" type="text" autocomplete="given-name" maxlength="80" required placeholder="Jordan"></div>
+            <div class="field"><label for="lname">Last name</label><input id="lname" name="lastName" type="text" autocomplete="family-name" maxlength="80" placeholder="Rivera"></div>
           </div>
-          <div class="field"><label for="email">Email</label><input id="email" type="email" placeholder="you@company.com"></div>
+          <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="you@company.com"></div>
           <div class="field"><label for="rooftype">Roof type</label>
-            <select id="rooftype">
+            <select id="rooftype" name="roofType">
               <option>Flat commercial roof</option>
               <option>Pitched roof</option>
               <option>Podium / terrace</option>
@@ -677,8 +677,10 @@
               <option>Not sure yet</option>
             </select>
           </div>
-          <div class="field"><label for="details">Project details</label><textarea id="details" rows="3" placeholder="Approx. roof area, building type, timeline..."></textarea></div>
-          <button class="btn btn-primary" type="submit">Send request</button>
+          <div class="field"><label for="details">Project details</label><textarea id="details" name="details" rows="3" maxlength="1000" required placeholder="Approx. roof area, building type, timeline..."></textarea></div>
+          <button class="btn btn-primary" type="submit">Prepare enquiry email</button>
+          <p id="enquiryHelp" class="sub" style="margin:14px 0 0;">Opens your email app with your details. Please send the email to complete your enquiry. You can also email <a href="mailto:shikha.singh@earthgreen.life" style="text-decoration:underline;overflow-wrap:anywhere;">shikha.singh@earthgreen.life</a> directly.</p>
+          <p id="enquiryStatus" class="sub" role="status" aria-live="polite" style="margin:12px 0 0;"></p>
         </form>
       </div>
     </div>
@@ -721,6 +723,38 @@
 </footer>
 
 <script>
+
+  // Prepare an enquiry in the visitor's email app; sending remains their action.
+  const assessmentForm = document.getElementById('assessmentForm');
+  assessmentForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (!assessmentForm.reportValidity()) return;
+    const value = (id) => document.getElementById(id).value.trim();
+    if (!value('fname') || !value('details')) {
+      document.getElementById('enquiryStatus').textContent =
+        'Please enter your first name and project details.';
+      return;
+    }
+    const body = [
+      'Hello Earth Green Life,',
+      '',
+      'I would like to request a roof assessment.',
+      '',
+      'Name: ' + [value('fname'), value('lname')].filter(Boolean).join(' '),
+      'Email: ' + value('email'),
+      'Roof type: ' + value('rooftype'),
+      '',
+      'Project details:',
+      value('details')
+    ].join('\r\n');
+    const mailto = 'mailto:shikha.singh@earthgreen.life?subject=' +
+      encodeURIComponent('Roof assessment enquiry — Earth Green Life') +
+      '&body=' + encodeURIComponent(body);
+    document.getElementById('enquiryStatus').textContent =
+      'Please send the prepared email from your email app. If no app opens, email shikha.singh@earthgreen.life directly. Your enquiry has not been sent by this page.';
+    window.location.href = mailto;
+  });
+
   // Mobile menu toggle
   const menuBtn = document.querySelector('.menu-btn');
   const navLinks = document.querySelector('.nav-links');
